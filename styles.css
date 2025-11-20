@@ -40,9 +40,9 @@ main {
 #site-header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 1000; /* ensure it sits above pinned sections */
   backdrop-filter: blur(18px);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.95);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -651,10 +651,15 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 1.25rem;
+  padding: 5rem 1.25rem 4rem; /* top padding accounts for sticky header */
   overflow: hidden;
   position: relative;
-  background: #0f172a;
+  background: radial-gradient(
+    circle at 20% 10%,
+    #1a0d00 0%,
+    #0f0600 40%,
+    #000000 100%
+  );
 }
 
 .hero-inner {
@@ -687,7 +692,7 @@ main {
 .neon-glow {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 30% 30%, rgba(242,103,58,0.4), transparent 60%);
+  background: radial-gradient(circle at 30% 20%, rgba(242,103,58,0.5), rgba(113,154,10,0.25), transparent 65%);
   opacity: 0;
 }
 
@@ -706,6 +711,8 @@ main {
 
 /* HORIZONTAL STORY SCRUB */
 #story-panels {
+  position: relative;
+  z-index: 1;
   height: 100vh;
   overflow: hidden;
   background: #111;
@@ -755,4 +762,141 @@ main {
   font-size: 0.9rem;
   opacity: 0.9;
   font-weight: 400;
+}
+
+/* Performance hint for story-card images */
+.story-card img {
+  transform: translateZ(0); /* forces GPU layer */
+}
+
+/* Reduce layout thrashing */
+.story-track { will-change: transform; }
+
+#hero .hero-copy { 
+  overflow: visible !important;   /* this is the real fix */
+  z-index: 2;
+}
+
+#hero .hero-inner {
+  overflow: visible;   /* safety net for the whole grid */
+}
+
+/* HERO ACTION BUTTON FIX — ensure visibility on dark hero background */
+#hero .hero-actions .btn-ghost {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+#hero .hero-actions .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+#hero #hero-title .line {
+  color: #fff;
+  text-shadow:
+    0 0 12px rgba(242, 103, 58, 0.6),
+    0 0 32px rgba(242, 103, 58, 0.45),
+    0 4px 12px rgba(0,0,0,0.7);
+}
+
+/* Stabilize hero title so it doesn't "wobble" as fonts load */
+#hero-title {
+  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 800;        /* explicit weight from your Google Fonts request */
+  font-synthesis: none;    /* don't let the browser fake bold/italic */
+}
+
+#hero-title .line {
+  display: block;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+/* Subtle text link for PDF menu */
+.header-link {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  color: var(--text-muted);
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+}
+
+.header-link:hover {
+  color: var(--black);
+  border-bottom-color: rgba(0, 0, 0, 0.25);
+}
+
+/* Call-to-order pill */
+.header-call {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding-inline: 1.1rem;
+  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.header-call-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.header-call-phone {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .header-inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .header-nav {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.6rem;
+  }
+
+  .header-call {
+    flex: 1;
+    justify-content: center;
+    padding-block: 0.6rem;
+  }
+
+  .header-link {
+    display: none; /* hide PDF link on very small screens if you want */
+  }
+}
+
+/* Events link with thin-line calendar */
+.header-events {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+}
+
+.header-events:hover {
+  color: var(--black);
+}
+
+.header-icon-calendar svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  color: var(--coney-orange); /* sets currentColor inside the SVG */
 }
