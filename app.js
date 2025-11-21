@@ -297,12 +297,40 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
   if (!heroTicket || !aboutSection || !footer) return;
 
   // Ensure hero-ticket is hidden at load / in the hero.
-  gsap.set(heroTicket, { autoAlpha: 0 });
+  gsap.set(heroTicket, { autoAlpha: 0, pointerEvents: "none", scale: 1 });
+
+  // 🔹 Micro-interaction: wiggle on hover / tap
+  const wiggleTicket = () => {
+    // small guard so we don't stack a thousand wiggles
+    if (gsap.isTweening(heroTicket)) return;
+
+    gsap.fromTo(
+      heroTicket,
+      { scale: 1 },
+      {
+        scale: 1.06,
+        duration: 0.16,
+        yoyo: true,
+        repeat: 1,
+        ease: "power1.inOut"
+      }
+    );
+  };
+
+  // Pointer interactions: hover (desktop) + tap (mobile)
+  heroTicket.addEventListener("pointerenter", (e) => {
+    if (e.pointerType === "mouse") {
+      wiggleTicket();
+    }
+  });
+
+  heroTicket.addEventListener("click", () => {
+    wiggleTicket();
+  });
 
   // Define the leaf-like path once; Scrub will control progression.
   const leafTl = gsap.timeline();
 
-  // Absolute transform values so behavior is deterministic
   leafTl
     .to(heroTicket, {
       y: 200,
@@ -336,35 +364,33 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 
     // Entering the About→Footer band from above (scrolling down)
     onEnter: () => {
-      // Reset transform baseline for a clean leaf path
-      gsap.set(heroTicket, { x: 0, y: 0, rotation: 0 });
+      gsap.set(heroTicket, { x: 0, y: 0, rotation: 0, scale: 1 });
 
       if (ticketPeek) {
         const rect = ticketPeek.getBoundingClientRect();
 
-        // Start hero-ticket where ticket-peek currently is
         gsap.set(heroTicket, {
           position: "fixed",
           top: rect.top,
           left: rect.left,
           right: "auto",
           bottom: "auto",
-          zIndex: 9999
+          zIndex: 9999,
+          pointerEvents: "auto"
         });
 
-        // Hide ticket-peek while leaf is active
         gsap.set(ticketPeek, {
           autoAlpha: 0,
           pointerEvents: "none"
         });
       } else {
-        // Fallback (e.g., mobile where ticket-peek is hidden)
         gsap.set(heroTicket, {
           position: "fixed",
           top: "120px",
           right: "8vw",
           left: "auto",
-          zIndex: 9999
+          zIndex: 9999,
+          pointerEvents: "auto"
         });
       }
 
@@ -375,10 +401,9 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
       });
     },
 
-    // Coming back into the About band from ABOVE (scrolling down again)
+    // Coming back into the About band from BELOW (scrolling up)
     onEnterBack: () => {
-      // Same behavior as onEnter for deterministic feel
-      gsap.set(heroTicket, { x: 0, y: 0, rotation: 0 });
+      gsap.set(heroTicket, { x: 0, y: 0, rotation: 0, scale: 1 });
 
       if (ticketPeek) {
         const rect = ticketPeek.getBoundingClientRect();
@@ -389,7 +414,8 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
           left: rect.left,
           right: "auto",
           bottom: "auto",
-          zIndex: 9999
+          zIndex: 9999,
+          pointerEvents: "auto"
         });
 
         gsap.set(ticketPeek, {
@@ -402,7 +428,8 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
           top: "120px",
           right: "8vw",
           left: "auto",
-          zIndex: 9999
+          zIndex: 9999,
+          pointerEvents: "auto"
         });
       }
 
@@ -415,19 +442,18 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 
     // Leaving the About band back upwards toward the story panels
     onLeaveBack: () => {
-      // Hide hero-ticket completely as soon as we're above About again
       gsap.to(heroTicket, {
         autoAlpha: 0,
         duration: 0.2,
         ease: "power1.inOut",
         onComplete: () => {
           gsap.set(heroTicket, {
-            clearProps: "position,top,left,right,bottom,x,y,rotation,zIndex"
+            clearProps: "position,top,left,right,bottom,x,y,rotation,zIndex,scale"
           });
+          gsap.set(heroTicket, { pointerEvents: "none" });
         }
       });
 
-      // Restore ticket-peek in the story section
       if (ticketPeek) {
         gsap.set(ticketPeek, {
           autoAlpha: 1,
@@ -456,3 +482,54 @@ gsap.set(
     force3D: true
   }
 );
+
+// cameo
+(() => {
+  const cameo = document.querySelector(".hero-cameo");
+  if (!cameo) return;
+
+  const inner = cameo.querySelector(".hero-cameo-inner");
+  const storyPanels = document.querySelector("#story-panels"); // <-- UPDATE if needed
+
+  const BOOP_URL = "audio/boop.mp3"; // update if needed
+  const boop = new Audio(BOOP_URL);
+  boop.preload = "auto";
+
+  const maxOffset = 18; // px – magnetic strength
+
+  // Desktop pointer “gravity”
+  cameo.addEventListener("pointermove", (e) => {
+    if (e.pointerType === "touch") return; // skip magnet on mobile
+
+    const rect = cameo.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+
+    const dist = Math.hypot(dx, dy) || 1;
+    const strength = Math.min(dist / (rect.width / 2), 1);
+
+    const offsetX = (dx / dist) * maxOffset * strength;
+    const offsetY = (dy / dist) * maxOffset * strength;
+
+    inner.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  });
+
+  cameo.addEventListener("pointerleave", () => {
+    inner.style.transform = "translate(0,0)";
+  });
+
+  // CLICK / TAP — boop + scroll to story panels
+  cameo.addEventListener("click", () => {
+    // play boop
+    boop.currentTime = 0;
+    boop.play().catch(() => {});
+
+    // smooth scroll to story panels
+    if (storyPanels) {
+      storyPanels.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+})();
