@@ -50,6 +50,56 @@ heroTL
     "-=1"
   );
 
+// Extra bump animation for the hero sign on hover/tap with boosted flicker
+window.addEventListener("DOMContentLoaded", () => {
+  const heroSign = document.querySelector(".hero-sign");
+  const vintageSign = document.querySelector(".vintage-sign");
+
+  if (!heroSign || !vintageSign) return;
+
+  const boostedFlicker = () => {
+    // Flashier flicker for 250ms
+    return gsap.fromTo(
+      vintageSign,
+      { opacity: 0.5 },
+      {
+        opacity: 1,
+        duration: 0.03,
+        repeat: 8,     // rapid strobing
+        yoyo: true,
+        ease: "none"
+      }
+    );
+  };
+
+  const bumpSign = () => {
+    if (gsap.isTweening(vintageSign)) return;
+
+    // Run the boosted flicker *in parallel* with the bump
+    boostedFlicker();
+
+    gsap.fromTo(
+      vintageSign,
+      { rotationX: 0, scale: 1, y: 0 },
+      {
+        rotationX: -12,
+        scale: 1.06,
+        y: -7,
+        duration: 0.22,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.out"
+      }
+    );
+  };
+
+  // Desktop hover
+  heroSign.addEventListener("mouseenter", bumpSign);
+
+  // Tap/click for mobile + desktop
+  heroSign.addEventListener("click", bumpSign);
+});
+
 // ------------------------------------------------------------------
 // 1b. HERO “GOLDEN TICKET” BADGE (now just the icon, no bubble text)
 // ------------------------------------------------------------------
@@ -94,6 +144,29 @@ window.addEventListener("DOMContentLoaded", () => {
       window.scrollTo({
         top: targetY,
         behavior: "smooth"
+      });
+    });
+
+    // HERO TICKET HOVER SHAKE
+    heroTicketBtn.addEventListener("mouseenter", () => {
+      gsap.fromTo(
+        heroTicketBtn,
+        { rotation: -4 },
+        {
+          rotation: 4,
+          duration: 0.06,
+          repeat: 7,
+          yoyo: true,
+          ease: "power1.inOut"
+        }
+      );
+    });
+
+    heroTicketBtn.addEventListener("mouseleave", () => {
+      gsap.to(heroTicketBtn, {
+        rotation: 0,
+        duration: 0.2,
+        ease: "power2.out"
       });
     });
   }

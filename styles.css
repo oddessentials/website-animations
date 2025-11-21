@@ -300,61 +300,34 @@ main {
 /* --- HERO TICKET BADGE --- */
 
 .hero-inner {
-  position: relative; /* ensure ticket can anchor to hero */
+  position: relative;
 }
 
+/* Position the ticket neatly near the hero copy */
 .hero-ticket {
   position: absolute;
-  right: 6vw;
-  bottom: 2.5rem;
+  top: calc(18% - 100px);
+  right: 8vw;
   z-index: 5;
-  pointer-events: none; /* inner button will re-enable */
+  pointer-events: none;
 }
 
+/* Hero ticket contains only the image now */
 .ticket-badge {
   pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: radial-gradient(circle at 0 0, rgba(242, 103, 58, 0.35), rgba(17, 17, 17, 0.92));
-  color: #fff;
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
   cursor: pointer;
-  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.65);
-  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  text-align: left;
 }
 
-.ticket-badge-image {
-  width: 60px;
+.ticket-badge img {
+  width: 90px;       /* adjust size freely */
   height: auto;
   display: block;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7));
-}
-
-.ticket-badge-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.ticket-badge-eyebrow {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  opacity: 0.85;
-}
-
-.ticket-badge-cta {
-  font-size: 0.86rem;
-  font-weight: 700;
-}
-
-.ticket-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,0.55));
+  transform-origin: center;
 }
 
 /* --- TICKET DIVIDER ABOVE STORY PANELS (overlay, no layout shift) --- */
@@ -1108,4 +1081,12 @@ main {
   height: 18px;
   display: block;
   color: var(--coney-orange); /* sets currentColor inside the SVG */
+}
+
+.ticket-badge img {
+  transform-origin: center;
+}
+
+.vintage-sign {
+  transform-origin: center bottom;
 }
