@@ -228,8 +228,9 @@ if (storyTrack) {
 
 // ------------------------------------------------------------------
 // 5. SCROLL-TRIGGERED TICKET DIVIDER
-//    - No more pin
-//    - Fades out as the timeline kicks in
+//    - Desktop: fades in + briefly pins, then fades out when timeline starts
+//    - Mobile: fades in, then fades OUT when story-panels start (so it
+//              doesn't cover the slideshow once ticket-peek appears)
 // ------------------------------------------------------------------
 const ticketDivider = document.querySelector("#ticket-divider");
 const mm = gsap.matchMedia();
@@ -265,17 +266,21 @@ mm.add("(min-width: 768px)", () => {
           opacity: 0,
           y: -30,
           duration: 0.4,
-          ease: "power2.inOut"
+          ease: "power2.inOut",
+          onComplete: () => {
+            gsap.set(ticketDivider, { pointerEvents: "none" });
+          }
         });
       }
     });
   }
 });
 
-// softer one-shot entrance on small screens, no special fade-out needed
+// MOBILE: fade in, then fade OUT once the story panels kick in
 mm.add("(max-width: 767px)", () => {
   if (!ticketDivider) return;
 
+  // initial entrance as before
   gsap.from(ticketDivider, {
     opacity: 0,
     y: 30,
@@ -287,6 +292,24 @@ mm.add("(max-width: 767px)", () => {
       once: true
     }
   });
+
+  if (storyPanels) {
+    ScrollTrigger.create({
+      trigger: storyPanels,
+      start: "top top",
+      onEnter: () => {
+        gsap.to(ticketDivider, {
+          opacity: 0,
+          y: -20,
+          duration: 0.35,
+          ease: "power2.out",
+          onComplete: () => {
+            gsap.set(ticketDivider, { pointerEvents: "none" });
+          }
+        });
+      }
+    });
+  }
 });
 
 // ------------------------------------------------------------------

@@ -996,6 +996,10 @@ main {
   display: block;
 }
 
+#hero-ticket {
+  visibility: hidden;
+}
+
 .header-nav {
   display: flex;
   align-items: center;
@@ -1101,6 +1105,43 @@ main {
   50% { transform: translateY(-20px) rotate(2deg); }
 }
 
-#hero-ticket {
-  visibility: hidden;
+/* ============================================================
+   MOBILE HERO IMAGE FIX — OVERRIDES ABOVE RULES
+   Makes hero image full-width, large, and prevents tiny scaling
+   ============================================================ */
+@media (max-width: 767px) {
+
+  /* Stack the hero content vertically */
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    gap: 1.5rem;
+  }
+
+  /* Let the image wrapper expand fully */
+  .hero-image-reveal {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto;
+    padding: 0;
+    overflow: hidden; /* Keep reveal effect tidy */
+  }
+
+  /* Make the actual hero image large and unshrinkable */
+  .hero-main-photo {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: cover;
+    flex-shrink: 0 !important;
+    display: block;
+  }
+
+  /* Optional: soften clipping if you have a strong overlay */
+  .photo-overlay {
+    opacity: 0.35; /* tweak or remove */
+  }
 }
