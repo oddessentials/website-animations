@@ -89,6 +89,22 @@
           <div class="photo-overlay"></div>
           <div class="neon-glow"></div>
         </div>
+
+        <!-- NEW: Hero ticket badge -->
+        <div class="hero-ticket" id="hero-ticket">
+          <button class="ticket-badge" type="button" aria-label="See our history timeline">
+            <img
+              src="img/pottsville-coney-coupon-vectorized.svg"
+              alt=""
+              class="ticket-badge-image"
+            />
+            <span class="ticket-badge-text">
+              <span class="ticket-badge-eyebrow">Vintage Ticket</span>
+              <span class="ticket-badge-cta">Tap to see our story</span>
+            </span>
+          </button>
+        </div>
+        <!-- /NEW hero ticket -->
       </div>
 
       <!-- Subtle vintage sign flicker below -->
@@ -99,6 +115,23 @@
 
     <!-- STORY PANELS – now with horizontal scrub instead of boring colored blocks -->
     <section id="story-panels" data-speed="0.6">
+      <!-- NEW: Scroll-triggered ticket divider -->
+      <div class="ticket-divider" id="ticket-divider">
+        <div class="ticket-divider-inner">
+          <img
+            src="img/pottsville-coney-coupon-vectorized.svg"
+            alt="Vintage Coney Island ticket"
+            class="ticket-divider-image"
+          />
+          <div class="ticket-divider-copy">
+            <p class="ticket-divider-eyebrow">Admit One</p>
+            <p class="ticket-divider-title">100+ Years of Coney History</p>
+            <p class="ticket-divider-subtitle">Scroll to ride through the decades.</p>
+          </div>
+        </div>
+      </div>
+      <!-- /NEW ticket divider -->
+
       <div class="story-track">
         <figure class="story-card">
           <img src="img/story-panels/coney-island-pottsville-2025.jpg" alt="Staff & regulars" />
@@ -149,6 +182,19 @@
           <figcaption>Cheers and Thank you!<br><span>- The Coney Island</span></figcaption>
         </figure>
       </div>
+
+      <!-- NEW: Draggable ticket peek overlay (desktop only via CSS/JS) -->
+      <div class="ticket-peek" id="ticket-peek" aria-hidden="true">
+        <div class="ticket-peek-card">
+          <img
+            src="img/pottsville-coney-coupon-vectorized.svg"
+            alt=""
+            class="ticket-peek-image"
+          />
+          <div class="ticket-peek-label"></div>
+        </div>
+      </div>
+      <!-- /NEW ticket peek -->
     </section>
 
     <!-- ABOUT SECTION -->
@@ -271,6 +317,8 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Observer.min.js"></script>
+  <!-- NEW: Draggable plugin for the ticket peek -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Draggable.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

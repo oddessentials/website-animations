@@ -295,6 +295,216 @@ main {
   }
 }
 
+/* styles.css – ADD THESE STYLES (can be placed near other hero/story styles) */
+
+/* --- HERO TICKET BADGE --- */
+
+.hero-inner {
+  position: relative; /* ensure ticket can anchor to hero */
+}
+
+.hero-ticket {
+  position: absolute;
+  right: 6vw;
+  bottom: 2.5rem;
+  z-index: 5;
+  pointer-events: none; /* inner button will re-enable */
+}
+
+.ticket-badge {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: radial-gradient(circle at 0 0, rgba(242, 103, 58, 0.35), rgba(17, 17, 17, 0.92));
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.65);
+  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: left;
+}
+
+.ticket-badge-image {
+  width: 60px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7));
+}
+
+.ticket-badge-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ticket-badge-eyebrow {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  opacity: 0.85;
+}
+
+.ticket-badge-cta {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.ticket-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
+}
+
+/* --- TICKET DIVIDER ABOVE STORY PANELS (overlay, no layout shift) --- */
+
+.ticket-divider {
+  position: absolute;
+  top: 10%;              /* adjust as you like (e.g., 8%, 12%) */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;  /* inner can re-enable */
+  z-index: 3;            /* above photos but below header */
+}
+
+.ticket-divider-inner {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.75rem;
+  padding: 1.4rem 1.8rem;
+  border-radius: 18px;
+  background: radial-gradient(
+    circle at 10% 0%,
+    rgba(242, 103, 58, 0.5),
+    rgba(17, 17, 17, 0.95)
+  );
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+}
+
+.ticket-divider-image {
+  max-width: 190px;
+  height: auto;
+  display: block;
+}
+
+.ticket-divider-copy {
+  color: #fff;
+  font-family: "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.ticket-divider-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin: 0 0 0.35rem;
+}
+
+.ticket-divider-title {
+  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  margin: 0 0 0.25rem;
+}
+
+.ticket-divider-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* --- DRAGGABLE TICKET PEEK OVER STORY PANELS (DESKTOP ONLY) --- */
+
+.ticket-peek {
+  position: absolute;
+  top: 55%;        /* vertical position as a percentage of story-panels */
+  right: 8vw;
+  transform: translateY(-50%); /* center around that 55% point */
+  z-index: 4;
+  pointer-events: none;
+}
+
+.ticket-peek-card {
+  pointer-events: auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.9rem 0.75rem;
+  border-radius: 16px;
+  background: rgba(17, 17, 17, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8);
+  cursor: grab;
+}
+
+.ticket-peek-card:active {
+  cursor: grabbing;
+}
+
+.ticket-peek-image {
+  width: 120px;
+  max-width: 26vw;
+  display: block;
+}
+
+.ticket-peek-label {
+  font-size: 0.78rem;
+  color: #fff;
+  opacity: 0.85;
+  font-family: "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* --- RESPONSIVE TUNING --- */
+
+@media (max-width: 900px) {
+  .hero-ticket {
+    right: 5vw;
+    bottom: 1.6rem;
+    transform: scale(0.9);
+    transform-origin: bottom right;
+  }
+
+  .ticket-badge-image {
+    width: 50px;
+  }
+
+  .ticket-badge-cta {
+    font-size: 0.8rem;
+  }
+
+  .ticket-divider-inner {
+    flex-direction: row;
+  }
+
+  .ticket-divider-image {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 700px) {
+  .ticket-divider {
+    top: 8%;
+  }
+
+  .ticket-divider-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ticket-divider-image {
+    max-width: 65vw;
+  }
+
+  .ticket-peek {
+    display: none; /* hide draggable overlay on smaller screens */
+  }
+}
+
 /* STORY PANELS ---------------------------------------------------------- */
 
 #story {
