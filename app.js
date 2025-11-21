@@ -1,5 +1,5 @@
 // app.js
-gsap.registerPlugin(ScrollTrigger, Observer, Draggable);
+gsap.registerPlugin(ScrollTrigger, Draggable);
 
 // We'll reuse this for responsive behaviors
 const mm = gsap.matchMedia();
@@ -127,7 +127,11 @@ function flickerSign() {
     onComplete: () => gsap.delayedCall(gsap.utils.random(8, 25), flickerSign)
   });
 }
-flickerSign();
+
+// Only run the infinite flicker if user does NOT request reduced motion
+mm.add("(prefers-reduced-motion: no-preference)", () => {
+  flickerSign();
+});
 
 // ------------------------------------------------------------------
 // 4. Story panels + ticket-divider
@@ -205,15 +209,17 @@ if (storyTrack && storyPanels) {
     mm.add("(max-width: 767px)", () => {
       gsap.set(ticketDivider, { autoAlpha: 0, y: 40 });
 
+      let lastAlpha = -1;
+      let lastY = NaN;
+
       ScrollTrigger.create({
         trigger: "#story-panels",
-        start: "top bottom",   // when panels just begin to enter viewport
-        end: "top top",        // stops right before pinning starts
+        start: "top bottom",
+        end: "top top",
         scrub: true,
         onUpdate: self => {
-          const p = self.progress; // 0 → 1 over the unpinned approach zone
+          const p = self.progress; // 0 → 1 over the approach zone
 
-          // fade in → hold → fade out
           let alpha;
           if (p < 0.3) {
             alpha = p / 0.3;
@@ -223,10 +229,14 @@ if (storyTrack && storyPanels) {
             alpha = 1;
           }
 
-          gsap.set(ticketDivider, {
-            autoAlpha: alpha,
-            y: gsap.utils.mapRange(0, 1, 40, -40, p)
-          });
+          const y = gsap.utils.mapRange(0, 1, 40, -40, p);
+
+          // Only touch the DOM when something actually changes
+          if (alpha !== lastAlpha || y !== lastY) {
+            lastAlpha = alpha;
+            lastY = y;
+            gsap.set(ticketDivider, { autoAlpha: alpha, y });
+          }
         }
       });
     });
@@ -431,7 +441,18 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 // ------------------------------------------------------------------
 // Performance boost
 // ------------------------------------------------------------------
-gsap.set([".hero-main-photo", ".story-card img", ".vintage-sign"], {
-  willChange: "transform, opacity",
-  force3D: true
-});
+gsap.set(
+  [
+    ".hero-main-photo",
+    ".hero-actions .btn",
+    ".hero-sign",
+    ".story-card img",
+    ".vintage-sign",
+    "#ticket-peek",
+    "#hero-ticket"
+  ],
+  {
+    willChange: "transform, opacity",
+    force3D: true
+  }
+);
