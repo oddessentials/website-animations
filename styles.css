@@ -1092,14 +1092,61 @@ main {
   transform-origin: center bottom;
 }
 
+/* ------------------------------------------ */
+/* BASE FLOATING HOT DOG ANIMATION            */
+/* ------------------------------------------ */
+
 .dancing-couple {
   height: 140px;
   filter: drop-shadow(0 0 30px #f2673a) drop-shadow(0 0 60px #719a0a);
   animation: float 6s ease-in-out infinite;
+  transform-origin: center bottom;
+  transition:
+    filter 0.35s ease,
+    transform 0.35s ease;
 }
+
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50% { transform: translateY(-20px) rotate(2deg); }
+  50%      { transform: translateY(-20px) rotate(2deg); }
+}
+
+/* ------------------------------------------ */
+/* WRAPPER + MAGNETIC HOVER SETUP             */
+/* ------------------------------------------ */
+
+.hero-cameo {
+  display: inline-block;
+  position: relative;
+}
+
+.hero-cameo-inner {
+  display: inline-block;
+  transition: transform 0.25s ease-out; /* magnetic movement */
+}
+
+
+/* ------------------------------------------ */
+/* NEON POWER-UP + WOBBLE ON HOVER/TAP        */
+/* ------------------------------------------ */
+
+.hero-cameo:hover .dancing-couple,
+.hero-cameo:active .dancing-couple {
+  filter:
+    drop-shadow(0 0 40px #f2673a)
+    drop-shadow(0 0 90px #719a0a)
+    brightness(1.2)
+    saturate(1.2);
+
+  animation: wobble-pop 0.6s ease-out forwards;
+}
+
+@keyframes wobble-pop {
+  0%   { transform: translateY(0)     scale(1)          rotate(0deg); }
+  20%  { transform: translateY(-10px) scale(1.06,0.94)  rotate(-6deg); }
+  45%  { transform: translateY(-4px)  scale(0.96,1.04)  rotate(5deg); }
+  70%  { transform: translateY(-2px)  scale(1.03,0.97)  rotate(-3deg); }
+  100% { transform: translateY(0)     scale(1)          rotate(0deg); }
 }
 
 /* ============================================================

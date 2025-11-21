@@ -456,3 +456,54 @@ gsap.set(
     force3D: true
   }
 );
+
+// cameo
+(() => {
+  const cameo = document.querySelector(".hero-cameo");
+  if (!cameo) return;
+
+  const inner = cameo.querySelector(".hero-cameo-inner");
+  const storyPanels = document.querySelector("#story-panels"); // <-- UPDATE if needed
+
+  const BOOP_URL = "audio/boop.mp3"; // update if needed
+  const boop = new Audio(BOOP_URL);
+  boop.preload = "auto";
+
+  const maxOffset = 18; // px – magnetic strength
+
+  // Desktop pointer “gravity”
+  cameo.addEventListener("pointermove", (e) => {
+    if (e.pointerType === "touch") return; // skip magnet on mobile
+
+    const rect = cameo.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+
+    const dist = Math.hypot(dx, dy) || 1;
+    const strength = Math.min(dist / (rect.width / 2), 1);
+
+    const offsetX = (dx / dist) * maxOffset * strength;
+    const offsetY = (dy / dist) * maxOffset * strength;
+
+    inner.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  });
+
+  cameo.addEventListener("pointerleave", () => {
+    inner.style.transform = "translate(0,0)";
+  });
+
+  // CLICK / TAP — boop + scroll to story panels
+  cameo.addEventListener("click", () => {
+    // play boop
+    boop.currentTime = 0;
+    boop.play().catch(() => {});
+
+    // smooth scroll to story panels
+    if (storyPanels) {
+      storyPanels.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+})();
