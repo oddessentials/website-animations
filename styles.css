@@ -395,7 +395,7 @@ main {
 .ticket-peek {
   position: absolute;
   top: 55%;        /* vertical position as a percentage of story-panels */
-  right: 8vw;
+  left: 8vw;
   transform: translateY(-50%); /* center around that 55% point */
   z-index: 4;
   pointer-events: none;
