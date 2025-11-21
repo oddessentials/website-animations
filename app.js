@@ -120,7 +120,6 @@ window.addEventListener("DOMContentLoaded", () => {
       ease: "power3.out"
     });
 
-    // gentle float while we're in the hero
     heroTicketTl.to(
       "#hero-ticket",
       {
@@ -329,20 +328,20 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 });
 
 // ------------------------------------------------------------------
-// 7. HERO TICKET "AUTUMN LEAF" FALL INTO FOOTER
+// 7. HERO TICKET "AUTUMN LEAF" FALL FROM TICKET-PEEK INTO FOOTER
 // ------------------------------------------------------------------
 (() => {
   const heroTicket = document.querySelector("#hero-ticket");
+  const ticketPeek = document.querySelector("#ticket-peek");
   const aboutSection = document.querySelector("#about");
   const footer = document.querySelector(".footer");
 
   if (!heroTicket || !aboutSection || !footer) return;
 
-  // Leaf-like path: drift left/right while falling down the page
+  // The path the ticket follows once it starts "falling"
   const leafTl = gsap.timeline();
 
   leafTl
-    // first gentle drift
     .to(heroTicket, {
       y: "+=200",
       x: "-=40",
@@ -350,7 +349,6 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
       duration: 0.3,
       ease: "sine.inOut"
     })
-    // sway back the other way, a bit deeper
     .to(heroTicket, {
       y: "+=260",
       x: "+=30",
@@ -358,7 +356,6 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
       duration: 0.35,
       ease: "sine.inOut"
     })
-    // final settle near the bottom (tweak offsets as needed)
     .to(heroTicket, {
       y: "+=360",
       x: "-=20",
@@ -370,19 +367,70 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
   ScrollTrigger.create({
     animation: leafTl,
     trigger: aboutSection,
-    start: "top bottom",           // when About enters the viewport
-    endTrigger: footer,            // run all the way down to the footer
+    start: "top bottom",   // when About first enters the viewport
+    endTrigger: footer,
     end: "bottom bottom",
     scrub: true,
-    onEnter: () => {
-      if (heroTicketTl) heroTicketTl.pause();
 
-      // ensure the ticket is free from overflow clipping
-      gsap.set("#hero-ticket", {
-        position: "fixed",
-        top: "120px",
-        right: "8vw"
+    onEnter: () => {
+      // pause the gentle hero float once the leaf behavior takes over
+      if (heroTicketTl) {
+        heroTicketTl.pause();
+      }
+
+      // If we have a ticket-peek (desktop), start from its LAST position
+      if (ticketPeek) {
+        const rect = ticketPeek.getBoundingClientRect();
+
+        // Move hero-ticket to match ticket-peek's current on-screen position
+        gsap.set(heroTicket, {
+          position: "fixed",
+          top: rect.top,
+          left: rect.left,
+          right: "auto",
+          bottom: "auto",
+          zIndex: 9999,
+          autoAlpha: 1
+        });
+
+        // Hide & disable ticket-peek so only hero-ticket is visible now
+        gsap.set(ticketPeek, {
+          autoAlpha: 0,
+          pointerEvents: "none"
+        });
+      } else {
+        // Fallback (e.g., mobile where ticket-peek is hidden)
+        gsap.set(heroTicket, {
+          position: "fixed",
+          top: "120px",
+          right: "8vw",
+          left: "auto",
+          zIndex: 9999,
+          autoAlpha: 1
+        });
+      }
+    },
+
+    // When scrolling back UP from About → Story
+    onLeaveBack: () => {
+      // Let ticket-peek take over again in the story section
+      if (ticketPeek) {
+        gsap.set(ticketPeek, {
+          autoAlpha: 1,
+          pointerEvents: "auto"
+        });
+      }
+
+      // Put hero-ticket back under normal hero control
+      gsap.set(heroTicket, {
+        clearProps: "position,top,left,right,bottom,zIndex"
+        // we intentionally leave transforms alone;
+        // heroTicketTl will take over again if in view
       });
+
+      if (heroTicketTl) {
+        heroTicketTl.play();
+      }
     }
   });
 })();
