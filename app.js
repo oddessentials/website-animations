@@ -330,6 +330,16 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 // ------------------------------------------------------------------
 // 7. HERO TICKET "AUTUMN LEAF" FALL FROM TICKET-PEEK INTO FOOTER
 // ------------------------------------------------------------------
+// Reveal hero-ticket when story panels come into view (first time)
+ScrollTrigger.create({
+  trigger: "#story-panels",
+  start: "top center",
+  once: true,
+  onEnter: () => {
+    gsap.set("#hero-ticket", { visibility: "visible", autoAlpha: 1 });
+  }
+});
+
 (() => {
   const heroTicket = document.querySelector("#hero-ticket");
   const ticketPeek = document.querySelector("#ticket-peek");
@@ -413,7 +423,7 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 
     // When scrolling back UP from About → Story
     onLeaveBack: () => {
-      // Let ticket-peek take over again in the story section
+      // restore ticket-peek when coming back into timeline
       if (ticketPeek) {
         gsap.set(ticketPeek, {
           autoAlpha: 1,
@@ -421,13 +431,14 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
         });
       }
 
-      // Put hero-ticket back under normal hero control
+      // hide hero-ticket again when returning above About
       gsap.set(heroTicket, {
+        visibility: "hidden",
+        autoAlpha: 0,
         clearProps: "position,top,left,right,bottom,zIndex"
-        // we intentionally leave transforms alone;
-        // heroTicketTl will take over again if in view
       });
 
+      // restore hero floating only if you ever want it visible again in the hero
       if (heroTicketTl) {
         heroTicketTl.play();
       }
