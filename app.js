@@ -1,6 +1,8 @@
 // app.js
 gsap.registerPlugin(ScrollTrigger, Observer, Draggable);
-let heroTicketTl;
+
+// We'll reuse this for responsive behaviors
+const mm = gsap.matchMedia();
 
 // ------------------------------------------------------------------
 // 1. Hero entrance – runs once on load
@@ -51,7 +53,9 @@ heroTL
     "-=1"
   );
 
-// Extra bump animation for the hero sign on hover/tap with boosted flicker
+// ------------------------------------------------------------------
+// 1a. Extra bump animation for the hero sign on hover/tap with boosted flicker
+// ------------------------------------------------------------------
 window.addEventListener("DOMContentLoaded", () => {
   const heroSign = document.querySelector(".hero-sign");
   const vintageSign = document.querySelector(".vintage-sign");
@@ -59,14 +63,13 @@ window.addEventListener("DOMContentLoaded", () => {
   if (!heroSign || !vintageSign) return;
 
   const boostedFlicker = () => {
-    // Flashier flicker for 250ms
     return gsap.fromTo(
       vintageSign,
       { opacity: 0.5 },
       {
         opacity: 1,
         duration: 0.03,
-        repeat: 8,     // rapid strobing
+        repeat: 8,
         yoyo: true,
         ease: "none"
       }
@@ -76,7 +79,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const bumpSign = () => {
     if (gsap.isTweening(vintageSign)) return;
 
-    // Run the boosted flicker *in parallel* with the bump
     boostedFlicker();
 
     gsap.fromTo(
@@ -94,82 +96,8 @@ window.addEventListener("DOMContentLoaded", () => {
     );
   };
 
-  // Desktop hover
   heroSign.addEventListener("mouseenter", bumpSign);
-
-  // Tap/click for mobile + desktop
   heroSign.addEventListener("click", bumpSign);
-});
-
-// ------------------------------------------------------------------
-// 1b. HERO “GOLDEN TICKET” BADGE (now just the icon, no bubble text)
-// ------------------------------------------------------------------
-window.addEventListener("DOMContentLoaded", () => {
-  const header = document.querySelector("#site-header");
-  const storyPanels = document.querySelector("#story-panels");
-  const heroTicketBtn = document.querySelector("#hero-ticket .ticket-badge");
-
-  if (heroTicketBtn) {
-    heroTicketTl = gsap.timeline({ delay: 1.1 });
-
-    heroTicketTl.from("#hero-ticket", {
-      opacity: 0,
-      y: 30,
-      rotate: -6,
-      duration: 0.8,
-      ease: "power3.out"
-    });
-
-    heroTicketTl.to(
-      "#hero-ticket",
-      {
-        y: "-=5",
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      },
-      "-=0.2"
-    );
-
-    // smooth scroll to story panels
-    heroTicketBtn.addEventListener("click", () => {
-      const target = document.querySelector("#story-panels");
-      if (!target) return;
-
-      const headerHeight = header ? header.offsetHeight : 0;
-      const rect = target.getBoundingClientRect();
-      const targetY = rect.top + window.scrollY - headerHeight - 16;
-
-      window.scrollTo({
-        top: targetY,
-        behavior: "smooth"
-      });
-    });
-
-    // HERO TICKET HOVER SHAKE (as you already have)
-    heroTicketBtn.addEventListener("mouseenter", () => {
-      gsap.fromTo(
-        heroTicketBtn,
-        { rotation: -4 },
-        {
-          rotation: 4,
-          duration: 0.06,
-          repeat: 7,
-          yoyo: true,
-          ease: "power1.inOut"
-        }
-      );
-    });
-
-    heroTicketBtn.addEventListener("mouseleave", () => {
-      gsap.to(heroTicketBtn, {
-        rotation: 0,
-        duration: 0.2,
-        ease: "power2.out"
-      });
-    });
-  }
 });
 
 // ------------------------------------------------------------------
@@ -202,18 +130,21 @@ function flickerSign() {
 flickerSign();
 
 // ------------------------------------------------------------------
-// 4. Horizontal story scroll – pinned, but header stays on top
+// 4. Story panels + ticket-divider
+//    - Desktop: ticket-divider tied to the scrubbed story timeline
+//    - Mobile: ticket-divider appears *between* hero and panels,
+//              and is gone before the slideshow pins
 // ------------------------------------------------------------------
 const storyTrack = document.querySelector(".story-track");
 const storyPanels = document.querySelector("#story-panels");
+const ticketDivider = document.querySelector("#ticket-divider");
 
-if (storyTrack) {
+if (storyTrack && storyPanels) {
   const getDistance = () =>
     Math.max(0, storyTrack.scrollWidth - window.innerWidth * 0.9);
 
-  gsap.to(storyTrack, {
-    x: () => -getDistance(),
-    ease: "none",
+  // Base timeline that controls the horizontal scrub + pin
+  const storyTl = gsap.timeline({
     scrollTrigger: {
       trigger: "#story-panels",
       start: "top top",
@@ -224,96 +155,87 @@ if (storyTrack) {
       invalidateOnRefresh: true
     }
   });
-}
 
-// ------------------------------------------------------------------
-// 5. SCROLL-TRIGGERED TICKET DIVIDER
-//    - Desktop: fades in + briefly pins, then fades out when timeline starts
-//    - Mobile: fades in, then fades OUT when story-panels start (so it
-//              doesn't cover the slideshow once ticket-peek appears)
-// ------------------------------------------------------------------
-const ticketDivider = document.querySelector("#ticket-divider");
-const mm = gsap.matchMedia();
-
-mm.add("(min-width: 768px)", () => {
-  if (!ticketDivider) return;
-
-  // nice entrance
-  gsap.fromTo(
-    ticketDivider,
-    { opacity: 0, y: 50 },
+  // Horizontal scroll of the photo track
+  storyTl.to(
+    storyTrack,
     {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ticketDivider,
-        start: "top 80%",
-        end: "top 60%",
-        scrub: true
-      }
-    }
+      x: () => -getDistance(),
+      ease: "none"
+    },
+    0
   );
 
-  // fade it away as soon as we hit the horizontal story timeline
-  if (storyPanels) {
-    ScrollTrigger.create({
-      trigger: storyPanels,
-      start: "top top",
-      onEnter: () => {
-        gsap.to(ticketDivider, {
-          opacity: 0,
-          y: -30,
-          duration: 0.4,
-          ease: "power2.inOut",
-          onComplete: () => {
-            gsap.set(ticketDivider, { pointerEvents: "none" });
+  // ------------ TICKET DIVIDER BEHAVIOR ------------ //
+  if (ticketDivider) {
+    // Desktop / tablet: divider tied to the pinned story timeline
+    mm.add("(min-width: 768px)", () => {
+      gsap.set(ticketDivider, { autoAlpha: 0 });
+
+      // Fade in near the start of the pinned section
+      storyTl.fromTo(
+        ticketDivider,
+        { autoAlpha: 0, y: 40 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.25,
+          ease: "power2.out"
+        },
+        0.0 // appear right as the timeline starts
+      );
+
+      // Fade out fairly early so photos are unobstructed
+      storyTl.to(
+        ticketDivider,
+        {
+          autoAlpha: 0,
+          y: -40,
+          duration: 0.25,
+          ease: "power2.in"
+        },
+        0.18 // gone before we're deep into the slideshow
+      );
+    });
+
+    // Mobile: divider lives in the "gap" between hero and panels,
+    // not over the pinned slideshow itself.
+    // MOBILE: divider appears between hero + panels,
+    //         then disappears before the pinned slideshow.
+    mm.add("(max-width: 767px)", () => {
+      gsap.set(ticketDivider, { autoAlpha: 0, y: 40 });
+
+      ScrollTrigger.create({
+        trigger: "#story-panels",
+        start: "top bottom",   // when panels just begin to enter viewport
+        end: "top top",        // stops right before pinning starts
+        scrub: true,
+        onUpdate: self => {
+          const p = self.progress; // 0 → 1 over the unpinned approach zone
+
+          // fade in → hold → fade out
+          let alpha;
+          if (p < 0.3) {
+            alpha = p / 0.3;
+          } else if (p > 0.7) {
+            alpha = (1 - p) / 0.3;
+          } else {
+            alpha = 1;
           }
-        });
-      }
+
+          gsap.set(ticketDivider, {
+            autoAlpha: alpha,
+            y: gsap.utils.mapRange(0, 1, 40, -40, p)
+          });
+        }
+      });
     });
   }
-});
+}
 
-// MOBILE: fade in, then fade OUT once the story panels kick in
-mm.add("(max-width: 767px)", () => {
-  if (!ticketDivider) return;
-
-  // initial entrance as before
-  gsap.from(ticketDivider, {
-    opacity: 0,
-    y: 30,
-    duration: 0.7,
-    ease: "power3.out",
-    scrollTrigger: {
-      trigger: ticketDivider,
-      start: "top 85%",
-      once: true
-    }
-  });
-
-  if (storyPanels) {
-    ScrollTrigger.create({
-      trigger: storyPanels,
-      start: "top top",
-      onEnter: () => {
-        gsap.to(ticketDivider, {
-          opacity: 0,
-          y: -20,
-          duration: 0.35,
-          ease: "power2.out",
-          onComplete: () => {
-            gsap.set(ticketDivider, { pointerEvents: "none" });
-          }
-        });
-      }
-    });
-  }
-});
 
 // ------------------------------------------------------------------
-// 6. DRAGGABLE TICKET PEEK (DESKTOP ONLY) – unchanged
+// 5. DRAGGABLE TICKET PEEK (DESKTOP ONLY)
 // ------------------------------------------------------------------
 mm.add("(pointer: fine) and (min-width: 1024px)", () => {
   const ticketPeek = document.querySelector("#ticket-peek");
@@ -351,18 +273,11 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 });
 
 // ------------------------------------------------------------------
-// 7. HERO TICKET "AUTUMN LEAF" FALL FROM TICKET-PEEK INTO FOOTER
+// 6. HERO TICKET "AUTUMN LEAF" FALL FROM TICKET-PEEK INTO FOOTER
+//    - hero-ticket is ONLY visible between About and Footer
+//    - starts from ticket-peek's position when entering About
+//    - hides again when we scroll back above About
 // ------------------------------------------------------------------
-// Reveal hero-ticket when story panels come into view (first time)
-ScrollTrigger.create({
-  trigger: "#story-panels",
-  start: "top center",
-  once: true,
-  onEnter: () => {
-    gsap.set("#hero-ticket", { visibility: "visible", autoAlpha: 1 });
-  }
-});
-
 (() => {
   const heroTicket = document.querySelector("#hero-ticket");
   const ticketPeek = document.querySelector("#ticket-peek");
@@ -371,29 +286,33 @@ ScrollTrigger.create({
 
   if (!heroTicket || !aboutSection || !footer) return;
 
-  // The path the ticket follows once it starts "falling"
+  // Ensure hero-ticket is hidden at load / in the hero.
+  gsap.set(heroTicket, { autoAlpha: 0 });
+
+  // Define the leaf-like path once; Scrub will control progression.
   const leafTl = gsap.timeline();
 
+  // Absolute transform values so behavior is deterministic
   leafTl
     .to(heroTicket, {
-      y: "+=200",
-      x: "-=40",
+      y: 200,
+      x: -40,
       rotation: -10,
-      duration: 0.3,
+      duration: 0.33,
       ease: "sine.inOut"
     })
     .to(heroTicket, {
-      y: "+=260",
-      x: "+=30",
+      y: 460,
+      x: -10,
       rotation: 12,
-      duration: 0.35,
+      duration: 0.33,
       ease: "sine.inOut"
     })
     .to(heroTicket, {
-      y: "+=360",
-      x: "-=20",
+      y: 720,
+      x: -30,
       rotation: 0,
-      duration: 0.4,
+      duration: 0.34,
       ease: "power2.out"
     });
 
@@ -405,28 +324,25 @@ ScrollTrigger.create({
     end: "bottom bottom",
     scrub: true,
 
+    // Entering the About→Footer band from above (scrolling down)
     onEnter: () => {
-      // pause the gentle hero float once the leaf behavior takes over
-      if (heroTicketTl) {
-        heroTicketTl.pause();
-      }
+      // Reset transform baseline for a clean leaf path
+      gsap.set(heroTicket, { x: 0, y: 0, rotation: 0 });
 
-      // If we have a ticket-peek (desktop), start from its LAST position
       if (ticketPeek) {
         const rect = ticketPeek.getBoundingClientRect();
 
-        // Move hero-ticket to match ticket-peek's current on-screen position
+        // Start hero-ticket where ticket-peek currently is
         gsap.set(heroTicket, {
           position: "fixed",
           top: rect.top,
           left: rect.left,
           right: "auto",
           bottom: "auto",
-          zIndex: 9999,
-          autoAlpha: 1
+          zIndex: 9999
         });
 
-        // Hide & disable ticket-peek so only hero-ticket is visible now
+        // Hide ticket-peek while leaf is active
         gsap.set(ticketPeek, {
           autoAlpha: 0,
           pointerEvents: "none"
@@ -438,32 +354,75 @@ ScrollTrigger.create({
           top: "120px",
           right: "8vw",
           left: "auto",
-          zIndex: 9999,
-          autoAlpha: 1
+          zIndex: 9999
         });
       }
+
+      gsap.to(heroTicket, {
+        autoAlpha: 1,
+        duration: 0.2,
+        ease: "power1.out"
+      });
     },
 
-    // When scrolling back UP from About → Story
+    // Coming back into the About band from ABOVE (scrolling down again)
+    onEnterBack: () => {
+      // Same behavior as onEnter for deterministic feel
+      gsap.set(heroTicket, { x: 0, y: 0, rotation: 0 });
+
+      if (ticketPeek) {
+        const rect = ticketPeek.getBoundingClientRect();
+
+        gsap.set(heroTicket, {
+          position: "fixed",
+          top: rect.top,
+          left: rect.left,
+          right: "auto",
+          bottom: "auto",
+          zIndex: 9999
+        });
+
+        gsap.set(ticketPeek, {
+          autoAlpha: 0,
+          pointerEvents: "none"
+        });
+      } else {
+        gsap.set(heroTicket, {
+          position: "fixed",
+          top: "120px",
+          right: "8vw",
+          left: "auto",
+          zIndex: 9999
+        });
+      }
+
+      gsap.to(heroTicket, {
+        autoAlpha: 1,
+        duration: 0.2,
+        ease: "power1.out"
+      });
+    },
+
+    // Leaving the About band back upwards toward the story panels
     onLeaveBack: () => {
-      // restore ticket-peek when coming back into timeline
+      // Hide hero-ticket completely as soon as we're above About again
+      gsap.to(heroTicket, {
+        autoAlpha: 0,
+        duration: 0.2,
+        ease: "power1.inOut",
+        onComplete: () => {
+          gsap.set(heroTicket, {
+            clearProps: "position,top,left,right,bottom,x,y,rotation,zIndex"
+          });
+        }
+      });
+
+      // Restore ticket-peek in the story section
       if (ticketPeek) {
         gsap.set(ticketPeek, {
           autoAlpha: 1,
           pointerEvents: "auto"
         });
-      }
-
-      // hide hero-ticket again when returning above About
-      gsap.set(heroTicket, {
-        visibility: "hidden",
-        autoAlpha: 0,
-        clearProps: "position,top,left,right,bottom,zIndex"
-      });
-
-      // restore hero floating only if you ever want it visible again in the hero
-      if (heroTicketTl) {
-        heroTicketTl.play();
       }
     }
   });
