@@ -1,5 +1,6 @@
 // app.js
 gsap.registerPlugin(ScrollTrigger, Observer, Draggable);
+let heroTicketTl;
 
 // ------------------------------------------------------------------
 // 1. Hero entrance – runs once on load
@@ -109,7 +110,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const heroTicketBtn = document.querySelector("#hero-ticket .ticket-badge");
 
   if (heroTicketBtn) {
-    const heroTicketTl = gsap.timeline({ delay: 1.1 });
+    heroTicketTl = gsap.timeline({ delay: 1.1 });
 
     heroTicketTl.from("#hero-ticket", {
       opacity: 0,
@@ -119,7 +120,7 @@ window.addEventListener("DOMContentLoaded", () => {
       ease: "power3.out"
     });
 
-    // gentle float
+    // gentle float while we're in the hero
     heroTicketTl.to(
       "#hero-ticket",
       {
@@ -147,7 +148,7 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // HERO TICKET HOVER SHAKE
+    // HERO TICKET HOVER SHAKE (as you already have)
     heroTicketBtn.addEventListener("mouseenter", () => {
       gsap.fromTo(
         heroTicketBtn,
@@ -326,6 +327,65 @@ mm.add("(pointer: fine) and (min-width: 1024px)", () => {
 
   return () => drags.forEach(d => d.kill());
 });
+
+// ------------------------------------------------------------------
+// 7. HERO TICKET "AUTUMN LEAF" FALL INTO FOOTER
+// ------------------------------------------------------------------
+(() => {
+  const heroTicket = document.querySelector("#hero-ticket");
+  const aboutSection = document.querySelector("#about");
+  const footer = document.querySelector(".footer");
+
+  if (!heroTicket || !aboutSection || !footer) return;
+
+  // Leaf-like path: drift left/right while falling down the page
+  const leafTl = gsap.timeline();
+
+  leafTl
+    // first gentle drift
+    .to(heroTicket, {
+      y: "+=200",
+      x: "-=40",
+      rotation: -10,
+      duration: 0.3,
+      ease: "sine.inOut"
+    })
+    // sway back the other way, a bit deeper
+    .to(heroTicket, {
+      y: "+=260",
+      x: "+=30",
+      rotation: 12,
+      duration: 0.35,
+      ease: "sine.inOut"
+    })
+    // final settle near the bottom (tweak offsets as needed)
+    .to(heroTicket, {
+      y: "+=360",
+      x: "-=20",
+      rotation: 0,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+
+  ScrollTrigger.create({
+    animation: leafTl,
+    trigger: aboutSection,
+    start: "top bottom",           // when About enters the viewport
+    endTrigger: footer,            // run all the way down to the footer
+    end: "bottom bottom",
+    scrub: true,
+    onEnter: () => {
+      if (heroTicketTl) heroTicketTl.pause();
+
+      // ensure the ticket is free from overflow clipping
+      gsap.set("#hero-ticket", {
+        position: "fixed",
+        top: "120px",
+        right: "8vw"
+      });
+    }
+  });
+})();
 
 // ------------------------------------------------------------------
 // Performance boost
